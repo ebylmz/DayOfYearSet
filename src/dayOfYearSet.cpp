@@ -14,7 +14,7 @@ namespace DoYGTU {
      *                              DayOfYearSet::DayOfYear
      ******************************************************************************/
     
-        DayOfYearSet::DayOfYear::DayOfYear (int theMonth, int theDay) {
+    DayOfYearSet::DayOfYear::DayOfYear (int theMonth, int theDay) {
         // first set the month, than set the day 
         // since each month don't have same number of days
         bool r = setMonth(theMonth) == EXIT_SUCCESS && setDay(theDay) == EXIT_SUCCESS;
@@ -50,8 +50,23 @@ namespace DoYGTU {
     }
 
     ostream & operator<< (ostream & outs, const DayOfYearSet::DayOfYear & d) {
-        outs << d.getDay() << "." << d.getMonth();
+        outs << d.getMonth() << "/" << d.getDay();
         return outs;
+    }
+
+    istream & operator>> (istream & ins, DayOfYearSet::DayOfYear & d) {
+        int theDay, theMonth;
+        char c;
+
+        ins >> theMonth >> c >> theDay;
+        if (c = '\\') {
+            d.setDay(theDay);
+            d.setDay(theMonth);
+        }
+        else
+            cerr << "(!) Invalid time format\n";
+
+        return ins;
     }
 
     bool operator== (const DayOfYearSet::DayOfYear & d1, const DayOfYearSet::DayOfYear & d2) {
@@ -62,7 +77,7 @@ namespace DoYGTU {
         return !(d1 == d2);
     }
 
-    const DayOfYearSet::DayOfYear DayOfYearSet::DayOfYear::operator++ () {
+    DayOfYearSet::DayOfYear DayOfYearSet::DayOfYear::operator++ () {
         // if today is the last day of month
         // set the day as first day of next month
         if (day == dayInMonth()) {
@@ -73,13 +88,13 @@ namespace DoYGTU {
             ++day;
         return *this; 
     } 
-    const DayOfYearSet::DayOfYear DayOfYearSet::DayOfYear::operator++ (int) {
+    DayOfYearSet::DayOfYear DayOfYearSet::DayOfYear::operator++ (int) {
         DayOfYearSet::DayOfYear tmp(*this);
         ++(*this);
         return tmp;
     }
 
-    const DayOfYearSet::DayOfYear DayOfYearSet::DayOfYear::operator-- () {
+    DayOfYearSet::DayOfYear DayOfYearSet::DayOfYear::operator-- () {
         // if today is the first day of month
         // set the day as last day of previos month
         if (day == 1) {
@@ -89,13 +104,13 @@ namespace DoYGTU {
         return *this;
     } 
 
-    const DayOfYearSet::DayOfYear DayOfYearSet::DayOfYear::operator-- (int) {
+    DayOfYearSet::DayOfYear DayOfYearSet::DayOfYear::operator-- (int) {
         DayOfYearSet::DayOfYear tmp(*this);
         --(*this);
         return tmp;
     }
 
-    int DayOfYearSet::DayOfYear::dayInMonth () {
+    int DayOfYearSet::DayOfYear::dayInMonth () const {
         switch (month) {
             case  1: return 31;
             case  2: return 28;
@@ -109,22 +124,37 @@ namespace DoYGTU {
             case 10: return 31;
             case 11: return 30;
             case 12: return 31;
-            default: return 0;
+            default: return 0;  // returns 0 for invalid month values
         }
+    }
+
+    inline bool DayOfYearSet::DayOfYear::isDay (int theDay) const {
+        return 1 <= theDay && theDay <= dayInMonth();
+    }
+
+    inline bool DayOfYearSet::DayOfYear::isMonth (int theMonth) const {
+        return 1 <= theMonth && theMonth <= 12;
     }
 
     /******************************************************************************
      *                             DayOfYearSet
      ******************************************************************************/
-    DayOfYearSet::DayOfYearSet (int capacity) : _capacity(capacity), _size(0) {
+    DayOfYearSet::DayOfYearSet (const DayOfYearSet & s) {
+        *this = s;  // operator= overloaded
+    }
+    
+    DayOfYearSet::DayOfYearSet (int capacity) : _capacity(capacity), _size(0), set(nullptr) {
         if (capacity < 0) {
             cerr << "(!) negative capacity\n";
             exit(1);
         }
-    }
-
-    DayOfYearSet::DayOfYearSet (const DayOfYearSet & s) {
-        *this = s;
+        else {
+            set = new DayOfYearSet::DayOfYear[_capacity];
+            if (set == nullptr) {
+                cerr << "(!) No enough memory. Aborted\n";
+                exit(1);
+            }
+        }
     }
 
     DayOfYearSet::DayOfYearSet (const vector<DayOfYearSet::DayOfYear> & v) 
@@ -152,7 +182,10 @@ namespace DoYGTU {
         }
     }
 
-    DayOfYearSet::~DayOfYearSet () {delete [] set;}
+    DayOfYearSet::~DayOfYearSet () {
+        if (capacity() > 0)
+            delete [] set;
+    }
 
     bool DayOfYearSet::isInSet (const DayOfYearSet::DayOfYear & element) const {
         for (int i = 0; i < size(); ++i)
@@ -167,8 +200,8 @@ namespace DoYGTU {
         // no duplicates are allowed in a set
         if (!isInSet(element)) {
             // resize the set if needed
-            if (size() == capacity()) 
-                r = resize(capacity() * 2);
+            if (size() == capacity())
+                r = (capacity() == 0) ? resize(10) : resize(capacity() * 2);
             else
                 r = EXIT_SUCCESS;
 
@@ -193,8 +226,11 @@ namespace DoYGTU {
 
     int DayOfYearSet::remove (int index) {
         if (0 <= index && index < size()) {
-            //! THEN WHAT HAPPENS AFTER DELETION
-            set[index] = DayOfYear();
+            // to maintain the set order which provided user
+            // move each elements towards to deleted place after removing 
+            for (int i = index + 1; i < size(); ++i)
+                set[i - 1] = set[i];
+            --_size;    // one element removed
             return EXIT_SUCCESS;
         }
         else {
@@ -204,9 +240,7 @@ namespace DoYGTU {
     }
 
     int DayOfYearSet::resize (int newCapacity) {
-        int r;
-            
-        DayOfYearSet::DayOfYear * tmp = new DayOfYearSet::DayOfYear[capacity()]; 
+        DayOfYearSet::DayOfYear * tmp = new DayOfYearSet::DayOfYear[newCapacity]; 
         if (tmp != nullptr) {
             _capacity = newCapacity;
             
@@ -216,41 +250,64 @@ namespace DoYGTU {
             
             delete [] set;
             set = tmp;
-            r = EXIT_SUCCESS;
+            return EXIT_SUCCESS;
         }
         else {
             cerr << "(!) No enough memory for new allocation\n";
-            r = EXIT_FAILURE;
+            return EXIT_FAILURE;
         }
-
-        return r;
     }
 
-    int DayOfYearSet::load (const char * filename) {}
-    //! NOT IMPLEMENTED YET
-    int DayOfYearSet::save (const char * filename) const {}
-    //! NOT IMPLEMENTED YET
+    int DayOfYearSet::load (const char * filename) {
+        ifstream ins(filename);
+        if (! ins.fail()) {
+            DayOfYear tmp;
+
+            while (ins >> tmp)
+                add(tmp);   // prevents dublicated values
+            //! NOT IMPLEMENTED PROPERLY
+            ins.close();
+            return EXIT_SUCCESS;
+        }
+            return EXIT_FAILURE;
+    }
+
+    int DayOfYearSet::save (const char * filename) const {
+        ofstream outs(filename);
+        
+        if (! outs.fail()) {
+            for (int i = 0; i < size(); ++i)
+                outs << set[i] << endl;
+            outs.close();
+            return EXIT_SUCCESS;
+        }
+        else
+            return EXIT_FAILURE;
+    }
 
     ostream & operator<< (ostream & outs, const DayOfYearSet & s) {
-        for (int i = 0; i < s.size(); ++i)
-            outs << s[i] << " ";
+        for (int i = 0; i < s.size(); ++i) {
+            outs << s[i];
+            if (i + 1 < s.size())
+                outs << ", ";
+        }
+            
         return outs;
     }
 
-    const DayOfYearSet & DayOfYearSet::operator= (const DayOfYearSet & other) {
+    DayOfYearSet & DayOfYearSet::operator= (const DayOfYearSet & other) {
         // update the size of set
-        if (capacity() != other.capacity()) {
+        if (capacity() != other.capacity() && capacity() != 0) {
             delete [] set;
-
             _capacity = other.capacity();
+            _size = other.size();
             set = new DayOfYearSet::DayOfYear[capacity()];
         }
 
         for (int i = 0; i < size(); ++i)
-            set[i] = set[i];
+            set[i] = other[i];
         
         return *this; 
-        // return other; 
     }
 
     bool DayOfYearSet::operator== (const DayOfYearSet & other) {
@@ -264,14 +321,14 @@ namespace DoYGTU {
         return !(*this == other);
     }
 
-    const DayOfYearSet DayOfYearSet::operator+ (const DayOfYearSet & other) {
+    DayOfYearSet DayOfYearSet::operator+ (const DayOfYearSet & other) {
         DayOfYearSet unionSet(*this);
         for (int i = 0; i < other.size(); ++i)
             add(other[i]);  // add functions does not allow dublicated values 
         return unionSet;
     }
 
-    const DayOfYearSet DayOfYearSet::operator- (const DayOfYearSet & other) {
+    DayOfYearSet DayOfYearSet::operator- (const DayOfYearSet & other) {
         DayOfYearSet diffSet;
 
         // add the elements which are belongs to only this set
@@ -282,7 +339,7 @@ namespace DoYGTU {
         return diffSet;
     }
 
-    const DayOfYearSet DayOfYearSet::operator^ (const DayOfYearSet & other) {
+    DayOfYearSet DayOfYearSet::operator^ (const DayOfYearSet & other) {
         DayOfYearSet intersectionSet;
 
         // add the elements which are belongs to both this and other set
@@ -293,7 +350,7 @@ namespace DoYGTU {
         return intersectionSet;
     }
   
-    const DayOfYearSet DayOfYearSet::operator! () {
+    DayOfYearSet DayOfYearSet::operator! () {
         const int DAY_IN_YEAR = 365;
         DayOfYearSet::DayOfYear day;  // initialized as January 1
         DayOfYearSet complementSet;
@@ -305,20 +362,20 @@ namespace DoYGTU {
         return complementSet;
     }
 
-    DayOfYearSet::DayOfYear & DayOfYearSet::operator[] (int position) {
-        if (position < capacity()) //! size or capacity
-            return set[position];
+    DayOfYearSet::DayOfYear & DayOfYearSet::operator[] (int index) {
+        if (index < capacity()) //! size or capacity
+            return set[index];
         else {
-            cerr << "(!) Invalid position at set. Aborted\n";
+            cerr << "(!) Invalid index at set. Aborted\n";
             exit(1);
         }
     }
 
-    const DayOfYearSet::DayOfYear & DayOfYearSet::operator[] (int position) const {
-        if (position < capacity()) //! size or capacity
-            return set[position];
+    const DayOfYearSet::DayOfYear & DayOfYearSet::operator[] (int index) const {
+        if (index < capacity()) //! size or capacity
+            return set[index];
         else {
-            cerr << "(!) Invalid position at set. Aborted\n";
+            cerr << "(!) Invalid index at set. Aborted\n";
             exit(1);
         }
     }

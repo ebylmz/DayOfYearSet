@@ -6,6 +6,9 @@
 
 using std::vector;
 using std::ostream;
+using std::istream;
+using std::ofstream;
+using std::ifstream;
 
 //! PROBLEMS
 // What happens after execution of remove()?
@@ -14,7 +17,6 @@ using std::ostream;
 // How to take compliment (!) of the set?
 
 //! USE decltype and auto
-//! There are 365 day in a year
 
 namespace DoYGTU {
     class DayOfYearSet {
@@ -35,7 +37,8 @@ namespace DoYGTU {
             // returns the number of the day passed so far
 
             friend ostream & operator<< (ostream & outs, const DayOfYear & d);
-            
+            friend istream & operator>> (istream & ins, DayOfYear & d);
+
             friend bool operator== (const DayOfYear & d1, const DayOfYear & d2);
             friend bool operator!= (const DayOfYear & d1, const DayOfYear & d2);
             //! is friend function needed (12 == d1)
@@ -43,16 +46,16 @@ namespace DoYGTU {
             friend const DayOfYear operator+ (const DayOfYear & d1, const DayOfYear & d2); 
             //! not sure is needed
             
-            const DayOfYear operator++ ();          // pre increment 
-            const DayOfYear operator++ (int);       // post increment
+            DayOfYear operator++ ();          // pre increment 
+            DayOfYear operator++ (int);       // post increment
             // set the day as next day (tomarrow) 
-            const DayOfYear operator-- ();          // pre decrement
-            const DayOfYear operator-- (int);       // post decrement 
+            DayOfYear operator-- ();          // pre decrement
+            DayOfYear operator-- (int);       // post decrement 
             // set the day as previos day (yesterday)
         private:
-            // bool isDay () const;
-            // bool isMonth () const;
-            int dayInMonth ();
+            bool isDay (int theDay) const;       //! IS NEDEED ?    
+            bool isMonth (int theMonth) const;     //! IS NEDEED ?  
+            int dayInMonth () const;
             // returns the total day in current month
 
             int day;
@@ -85,24 +88,24 @@ namespace DoYGTU {
         friend ostream & operator<< (ostream & outs, const DayOfYearSet & s);
         // prints DayOfYearSet details
 
-        const DayOfYearSet & operator= (const DayOfYearSet & other);
+        DayOfYearSet & operator= (const DayOfYearSet & other);
         bool operator== (const DayOfYearSet & other);
         bool operator!= (const DayOfYearSet & other);
         // two sets are equal if their elements are equal regardless of the keeping order
   
 
-        const DayOfYearSet operator+ (const DayOfYearSet & other);
+        DayOfYearSet operator+ (const DayOfYearSet & other);
         // returns the union set
-        const DayOfYearSet operator- (const DayOfYearSet & other);
+        DayOfYearSet operator- (const DayOfYearSet & other);
         // returns the difference set
-        const DayOfYearSet operator^ (const DayOfYearSet & other);
+        DayOfYearSet operator^ (const DayOfYearSet & other);
         // returns the intersection set
-        const DayOfYearSet operator! ();
+        DayOfYearSet operator! ();
         // returns the complement set
 
-        DayOfYear & operator[] (int position);             
+        DayOfYear & operator[] (int index);             
         // returns the element at given position as "lvalue"
-        const DayOfYear & operator[] (int position) const;  
+        const DayOfYear & operator[] (int index) const;  
         // returns the element at given position as "rvalue"
 
         int size () const;

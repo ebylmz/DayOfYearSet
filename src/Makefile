@@ -9,5 +9,8 @@ test.o: test.cpp
 dayOfYearSet.o: dayOfYearSet.cpp
 	g++ --std=c++11 dayOfYearSet.cpp -c
 
+valgrind: test
+	valgrind ./test
+
 clean:
 	rm -rf *.o test

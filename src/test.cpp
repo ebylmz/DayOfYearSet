@@ -41,6 +41,7 @@ void test6 ();
 int DayOfYearSet::_AllDoY = 0;
 
 int main (void) {
+    // test0 and test1 tests inner class DayOfYear
     /*
     cout << "Test0\n" << "================================\n";
     test0();
@@ -57,6 +58,8 @@ int main (void) {
     test5();
     cout << "\nTest6\n" << "================================\n";
     test6();
+
+    cout << "\n============== END OF DRIVER PROGRAM ==============\n";
     return 0;
 }
 
@@ -69,9 +72,9 @@ void test0 () {
 
     d2.setDay(1);
     d2.setMonth(1);
-
     cout << "today     : " << d2 << " (first day of the year)\n"
          << "yesterday : " << --d2 << endl
+
          << "5 days ago: " << d2 - 4 << endl    
          << "The days passed so far: " << d2.daySoFar() << endl;
 }
@@ -255,15 +258,24 @@ void test6 () {
     v.push_back(DayOfYearSet::DayOfYear(3, 24));
     v.push_back(DayOfYearSet::DayOfYear(4, 25));
     
-    DayOfYearSet s1(v);
-    cout << "So far " << DayOfYearSet::AllDoY() << " DoY object alive in DayOfYearSet sets\n";
-
-    DayOfYearSet s2;
+    DayOfYearSet s1(v), s2;
     s2.add(12, 2);    
     s2.add(6, 21);    
     s2.add(2, 25);    
     s2.add(7, 29);    
     s2.add(3, 17);    
-    cout << s2.size() << " new DoY object created\n"
-         << "So totaly " << DayOfYearSet::AllDoY() << " object alive in DayOfYearSet sets\n"; 
+    cout << "So far " << DayOfYearSet::AllDoY() << " DoY object alive in DayOfYearSet sets\n";
+
+    s1.remove(0);
+    s1.remove(0);
+    s1.remove(0);
+
+    cout << "Some of the elements are deleted\n"
+         << "Current DoY object number is " << DayOfYearSet::AllDoY() << endl; 
+
+    DayOfYearSet s3;
+    s3.load("setA.txt");
+
+    cout << s3.size() << " new DoY object created\n"
+         << "So right now " << DayOfYearSet::AllDoY() << " object alive in DayOfYearSet sets\n"; 
 }

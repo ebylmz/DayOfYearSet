@@ -1,3 +1,13 @@
+/**
+ * @file    dayOfYearSet.h
+ * @author  Emirkan Burak Yılmaz 
+ * @brief   Interface file for DayOfYearSet class   
+ * @version 0.1
+ * @date    2021-12-04
+ * 
+ * @copyright Copyright (c) 2021
+ */
+
 #ifndef DAY_OF_YEAR_SET
 #define DAY_OF_YEAR_SET
 
@@ -10,10 +20,6 @@ using std::istream;
 using std::ofstream;
 using std::ifstream;
 
-//! USE decltype and auto
-//! USE decltype and auto
-//! USE decltype and auto
-
 namespace DoYGTU {
     class DayOfYearSet {
     public:
@@ -24,16 +30,23 @@ namespace DoYGTU {
             // default DayOfYear objects initialized as January 1
 
             int setDay (int day);
+            // in case of invalid day returns EXIT_FAILURE
+            // and current date does not change
             int setMonth (int month);
+            // in case of invalid month returns EXIT_FAILURE
+            // and current date does not change
 
             int getDay () const;
             int getMonth () const;
+
+            int dayBetween (const DayOfYear & other) const; 
+            // returns the date between to date
+            // return negative values in case of other day later than this day
 
             int daySoFar () const;
             // returns the number of the day passed so far
 
             void print () const;
-            //! NOT IMPLEMTED YET
             // prints the day as words format
 
             friend ostream & operator<< (ostream & outs, const DayOfYear & d);
@@ -42,9 +55,6 @@ namespace DoYGTU {
             friend bool operator== (const DayOfYear & d1, const DayOfYear & d2);
             friend bool operator!= (const DayOfYear & d1, const DayOfYear & d2);
             //! is friend function needed (12 == d1)
-        
-            DayOfYear operator- (const DayOfYear & other) const; 
-            // returns the date between to date
 
             DayOfYear operator+ (int forward) const; 
             // returns the date of the forward day later
@@ -80,6 +90,7 @@ namespace DoYGTU {
         // deconstructor
 
         bool isInSet (const DayOfYear & element) const;
+        // checks if set contains given element 
         
         int add (const DayOfYear & element);
         // returns EXIT_SUCCESS: successful execution
@@ -103,8 +114,6 @@ namespace DoYGTU {
         // saves the elements of the current DoY set to the given file 
 
         friend ostream & operator<< (ostream & outs, const DayOfYearSet & s);
-        //! prints DayOfYearSet details
-        // should I add size information
 
         DayOfYearSet operator= (const DayOfYearSet & other);
         bool operator== (const DayOfYearSet & other);

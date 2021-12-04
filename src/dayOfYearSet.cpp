@@ -1,3 +1,13 @@
+/**
+ * @file    dayOfYearSet.cpp
+ * @author  Emirkan Burak Yılmaz 
+ * @brief   Implementation file for DayOfYearSet class   
+ * @version 0.1
+ * @date    2021-12-04
+ * 
+ * @copyright Copyright (c) 2021
+ */
+
 #include <iostream>
 #include <vector>
 #include "dayOfYearSet.h"
@@ -19,7 +29,7 @@ namespace DoYGTU {
         // since each month don't have same number of days
         bool r = setMonth(month) == EXIT_SUCCESS && setDay(day) == EXIT_SUCCESS;
         if (r == false) {
-            cerr << "(!)Invalid date (" << day << "." << month << "). Aborted\n";
+            cerr << "Aborted (!)\n";
             exit(1); 
         }
     }
@@ -29,8 +39,10 @@ namespace DoYGTU {
             _day = day;
             return EXIT_SUCCESS;   
         }
-        else
+        else {
+            cerr << "Invalid day value: " << day << " (!)\n";
             return EXIT_FAILURE;
+        }
     }
 
     int DayOfYearSet::DayOfYear::DayOfYear::setMonth (int month) {
@@ -38,18 +50,46 @@ namespace DoYGTU {
             _month = month;
             return EXIT_SUCCESS;   
         }
-        else
+        else {
+            cerr << "Invalid month value: " << month << " (!)\n";
             return EXIT_FAILURE;
+        }
     }
 
     inline int DayOfYearSet::DayOfYear::getDay () const {return _day;}
     inline int DayOfYearSet::DayOfYear::getMonth () const {return _month;}
 
+    int DayOfYearSet::DayOfYear::dayBetween (const DayOfYear & other) const {
+        const int DAY_IN_YEAR = 365;
+        int diff = other.daySoFar() - daySoFar();
+        if (diff < 0) 
+            diff += DAY_IN_YEAR;
+        return diff;
+    } 
+
     int DayOfYearSet::DayOfYear::daySoFar () const {
         int totalDay = 0;
-        for (int i = 1; i < getMonth(); ++i)
+        for (decltype(totalDay) i = 1; i < getMonth(); ++i)
             totalDay += dayInMonth(i);
         return totalDay + getDay();
+    }
+
+    void DayOfYearSet::DayOfYear::print () const {
+        switch (getMonth()) {
+            case  1: cout << "January";     break;
+            case  2: cout << "February";    break;
+            case  3: cout << "March";       break;
+            case  4: cout << "April";       break;
+            case  5: cout << "May";         break;
+            case  6: cout << "June";        break;
+            case  7: cout << "July";        break;
+            case  8: cout << "August";      break;
+            case  9: cout << "September";   break;
+            case 10: cout << "October";     break;
+            case 11: cout << "November";    break;
+            case 12: cout << "December";    break;
+        }
+        cout << " " << getDay();
     }
 
     ostream & operator<< (ostream & outs, const DayOfYearSet::DayOfYear & d) {
@@ -58,7 +98,6 @@ namespace DoYGTU {
     }
 
     istream & operator>> (istream & ins, DayOfYearSet::DayOfYear & d) {
-        //! OPTIMIZATION NEEDED
         int day, month;
         char c;
 
@@ -77,12 +116,6 @@ namespace DoYGTU {
     bool operator!= (const DayOfYearSet::DayOfYear & d1, const DayOfYearSet::DayOfYear & d2) {
         return !(d1 == d2);
     }
-    
-    DayOfYearSet::DayOfYear DayOfYearSet::DayOfYear::operator- (const DayOfYear & other) const {
-        const int DAY_IN_YEAR = 365;
-        int remainDay = daySoFar() - other.daySoFar();
-        return (remainDay < 0) ? remainDay + DAY_IN_YEAR : remainDay; 
-    } 
 
     DayOfYearSet::DayOfYear DayOfYearSet::DayOfYear::operator+ (int forward) const {
         DayOfYear newDay(*this);
@@ -177,14 +210,14 @@ namespace DoYGTU {
     /******************************************************************************
      *                             DayOfYearSet
      ******************************************************************************/
-    DayOfYearSet::DayOfYearSet (const DayOfYearSet & s) {
-        //! OPTIMIZATION NEEDED
-        _size = s.size();
-        _capacity = s.capacity();
+    DayOfYearSet::DayOfYearSet (const DayOfYearSet & s)
+    : _size(s.size()), _capacity(s.capacity()) {
         _set = new DayOfYearSet::DayOfYear[s.capacity()];
         if (_set != nullptr) {
             for (int i = 0; i < s.size(); ++i)
                 _set[i] = s[i];
+
+            _AllDoY += s.size();    // new DoY's created 
         }
         else {
             cerr << "No enough memory. Aborted (!)\n";
@@ -195,7 +228,7 @@ namespace DoYGTU {
     DayOfYearSet::DayOfYearSet (int capacity) 
     : _capacity(capacity), _size(0), _set(nullptr) {
         if (capacity < 0) {
-            cerr << "Negative capacity (!)\n";
+            cerr << "Negative capacity. Aborted (!) \n";
             exit(1);
         }
         else {
@@ -208,11 +241,11 @@ namespace DoYGTU {
     }
 
     DayOfYearSet::DayOfYearSet (const vector<DayOfYearSet::DayOfYear> & v) 
-    : _capacity(v.capacity()), _size(v.size()) {
+    : _capacity(v.capacity()), _size(0) {
         _set = new DayOfYearSet::DayOfYear[capacity()];
         if (_set != nullptr) {
             // dublicated values are ignored rather then exit(1)
-            for (int i = 0; i < size(); ++i)
+            for (int i = 0; i < v.size(); ++i)
                 if (add(v[i]) == EXIT_FAILURE)
                     cerr << "Dublicated value, ignored (!)\n";
         }  
@@ -227,11 +260,12 @@ namespace DoYGTU {
     }
 
     DayOfYearSet::~DayOfYearSet () {
+        _AllDoY -= size();  // killed DoY's
         delete [] _set;
     }
 
     bool DayOfYearSet::isInSet (const DayOfYearSet::DayOfYear & element) const {
-        for (int i = 0; i < size(); ++i)
+        for (auto i = 0; i < size(); ++i)
             if (_set[i] == element)
                 return true;
         return false;
@@ -250,10 +284,9 @@ namespace DoYGTU {
 
             // add the new element to the last index
             if (r == EXIT_SUCCESS) {
-                //! cout << "Added element: " << element << endl;
                 _set[size()] = element;
                 ++_size;
-                ++_AllDoY;     //! new active DoY object created
+                ++_AllDoY;     // new active DoY object created
             }
         }
         else r = EXIT_FAILURE;
@@ -275,6 +308,7 @@ namespace DoYGTU {
             for (int i = index + 1; i < size(); ++i)
                 _set[i - 1] = _set[i];
             --_size;    // one element removed
+            --_AllDoY;   // one DoY object killed
             return EXIT_SUCCESS;
         }
         else {
@@ -285,6 +319,7 @@ namespace DoYGTU {
 
     void DayOfYearSet::empty () {
         // no need to change the capacity
+        _AllDoY -= size();  // killed DoY's
         _size = 0;
     }
 
@@ -298,6 +333,7 @@ namespace DoYGTU {
                 tmp[i] = _set[i];
             
             delete [] _set;
+
             _set = tmp;
             return EXIT_SUCCESS;
         }
@@ -355,10 +391,12 @@ namespace DoYGTU {
         // update the capacity of the set
         if (capacity() != other.capacity()) {
             delete [] _set;
+            _AllDoY -= size();  // killed DoY's
             _capacity = other.capacity();
             _set = new DayOfYearSet::DayOfYear[capacity()];
         }
         _size = other.size();
+        _AllDoY += size();  // killed DoY's
 
         for (int i = 0; i < size(); ++i)
             _set[i] = other[i];

@@ -1,9 +1,12 @@
-/*
-** test.cpp:
-**
-** The test/driver program for the DayOfYearSet clas and it's inner class DayOfYear.
-**
-*/
+/**
+ * @file    test.cpp
+ * @author  Emirkan Burak Yılmaz 
+ * @brief   The test/driver program for DayOfYearSet & DayOfYear classes   
+ * @version 0.1
+ * @date    2021-12-04
+ * 
+ * @copyright Copyright (c) 2021
+ */
 
 #include <iostream>
 #include "dayOfYearSet.h"
@@ -12,29 +15,41 @@ using namespace std;
 using namespace DoYGTU;
 
 void test0 ();
+// test function for DayOfYear class
+// tests member functions operator++, setDay(), setMonth()
 void test1 ();
-
+// test function for DayOfYear class
+// tests member fucntions operator==, dayBetween()
 void test2 ();
+// test function for DayOfYearSet class
 // tests member functions add(), remove(), empty() 
 // size(), operator==, operator!=, operator[]  
 void test3 ();
+// test function for DayOfYearSet class
 // test union, difference, intersection and compliment properties
 // tests member functions operator^, operator+, operator-, operator! 
 void test4 ();
+// test function for DayOfYearSet class
 // test the member functions load() and save() 
 void test5 ();
+// test function for DayOfYearSet class
 // tests the De Morgan Laws
+
+void test6 ();
+// test function for DayOfYearSet class
+// test the static function AllDoY
 
 int DayOfYearSet::_AllDoY = 0;
 
 int main (void) {
     /*
+    */
+   /*
     cout << "Test0\n" << "================================\n";
     test0();
-    */
     cout << "\nTest1\n" << "================================\n";
     test1();
-   /*
+   */
     cout << "\nTest2\n" << "================================\n";
     test2();
     cout << "\nTest3\n" << "================================\n";
@@ -43,7 +58,8 @@ int main (void) {
     test4();
     cout << "\nTest5\n" << "================================\n";
     test5();
-   */
+    cout << "\nTest6\n" << "================================\n";
+    test6();
     return 0;
 }
 
@@ -65,18 +81,22 @@ void test0 () {
 
 void test1 () {
     DayOfYearSet::DayOfYear today, birthday;
-    cout << "Enter the todays date: ";
+    cout << "Enter todays date (MM/DD): ";
     cin >> today;    
-    cout << "Enter your birthday: ";
+    cout << "Enter your birthday (MM/DD): ";
     cin >> birthday;
 
-    //!!!!!!!!!!!!!!1 ERRORRRR
+    cout << "\nToday is "; 
+    today.print();
+    cout << "\nYour birthday is ";
+    birthday.print();
+    cout << "\n";
 
     if (today == birthday)
         cout << "Happy birthday to youu\n";
-    else 
-        cout << "There are " << today - birthday << " days to your birtday\n";
-}
+    else
+        cout << today.dayBetween(birthday) << " days left for your next birthday\n";
+}   
 
 void test2 () {
     DayOfYearSet s1, s2;
@@ -170,7 +190,6 @@ void test3 () {
     cout << "Complement of s1 has " << (!s1).size() << " element\n";
 }
 
-
 void test4 () {
     // construct sets s1 and s2
     DayOfYearSet s1, s2;
@@ -224,4 +243,24 @@ void test5 () {
     
     if (r == EXIT_FAILURE)
         cout << "Either De Morgan was Wrong or I implemented something wrong :)\n";             
+}
+
+void test6 () {
+    vector<DayOfYearSet::DayOfYear> v;
+    v.push_back(DayOfYearSet::DayOfYear(1, 22));
+    v.push_back(DayOfYearSet::DayOfYear(2, 23));
+    v.push_back(DayOfYearSet::DayOfYear(3, 24));
+    v.push_back(DayOfYearSet::DayOfYear(4, 25));
+    
+    DayOfYearSet s1(v);
+    cout << "So far " << DayOfYearSet::AllDoY() << " DoY object alive in DayOfYearSet sets\n";
+
+    DayOfYearSet s2;
+    s2.add(DayOfYearSet::DayOfYear(12, 2));    
+    s2.add(DayOfYearSet::DayOfYear(6, 21));    
+    s2.add(DayOfYearSet::DayOfYear(2, 25));    
+    s2.add(DayOfYearSet::DayOfYear(7, 29));    
+    s2.add(DayOfYearSet::DayOfYear(3, 17));    
+    cout << s2.size() << " new DoY object created\n"
+         << "So totaly " << DayOfYearSet::AllDoY() << " object alive in DayOfYearSet sets\n"; 
 }

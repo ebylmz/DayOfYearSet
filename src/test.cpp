@@ -34,7 +34,6 @@ void test4 ();
 void test5 ();
 // test function for DayOfYearSet class
 // tests the De Morgan Laws
-
 void test6 ();
 // test function for DayOfYearSet class
 // test the static function AllDoY
@@ -43,13 +42,11 @@ int DayOfYearSet::_AllDoY = 0;
 
 int main (void) {
     /*
-    */
-   /*
     cout << "Test0\n" << "================================\n";
     test0();
     cout << "\nTest1\n" << "================================\n";
     test1();
-   */
+    */
     cout << "\nTest2\n" << "================================\n";
     test2();
     cout << "\nTest3\n" << "================================\n";
@@ -113,7 +110,7 @@ void test2 () {
     s1.add(days[2]);
     s1.add(days[3]);
     s1.add(days[4]);
-    cout << "s1: " << s1 << " (size: " << s1.size() << ")\n";
+    cout << "s1: " << s1 << endl;
 
     // add same days as s1 with different order
     s2.add(days[4]);
@@ -121,7 +118,7 @@ void test2 () {
     s2.add(days[3]);
     s2.add(days[1]);
     s2.add(days[0]);
-    cout << "s2: " << s2 << " (size: " << s2.size() << ")\n";
+    cout << "s2: " << s2 << endl;
 
     if (s1 == s2)
         cout << "s1 and s2 are equal\n";
@@ -133,8 +130,8 @@ void test2 () {
     s1.remove(1);
     s1.remove(days[4]);
 
-    cout << "s1: " << s1 << " (size: " << s1.size() << ")\n";
-    cout << "s2: " << s2 << " (size: " << s2.size() << ")\n";
+    cout << "s1: " << s1 << endl;
+    cout << "s2: " << s2 << endl;
 
     if (s1 != s2)
         cout << "s1 and s2 are not equal\n";
@@ -143,9 +140,9 @@ void test2 () {
 
     cout << "\nMake empty s1 and s2 (delete the sets)\n";
     s1.empty();
-    cout << "s1: " << s1 << " (size: " << s1.size() << ")\n";
+    cout << "s1: " << s1 << endl;
     s2.empty();
-    cout << "s1: " << s2 << " (size: " << s2.size() << ")\n";
+    cout << "s2: " << s2 << endl;
 
     if (s1 != s2)
         cout << "s1 and s2 are not equal\n";
@@ -154,22 +151,27 @@ void test2 () {
 }
 
 void test3 () {
-    // construct s1 and s2
     DayOfYearSet s1, s2;
+    
+    cout << "construct s1 and s2\n";
     s1.add(DayOfYearSet::DayOfYear(1, 1));
     s1.add(DayOfYearSet::DayOfYear(4, 10));
     s1.add(DayOfYearSet::DayOfYear(5, 21));
     s1.add(DayOfYearSet::DayOfYear(5, 17));
     s1.add(DayOfYearSet::DayOfYear(3, 12));
+    s1.add(DayOfYearSet::DayOfYear(5, 29));
+    s1.add(DayOfYearSet::DayOfYear(2, 21));
+    s1.add(DayOfYearSet::DayOfYear(9, 12));
 
     s2.add(DayOfYearSet::DayOfYear(4, 22));
+    s2.add(DayOfYearSet::DayOfYear(5, 21));
     s2.add(DayOfYearSet::DayOfYear(7, 1));
+    s2.add(DayOfYearSet::DayOfYear(3, 12));
     s2.add(DayOfYearSet::DayOfYear(12, 15));
     s2.add(DayOfYearSet::DayOfYear(5, 17));
 
-    cout << "Sets\n"
-         << "s1: " << s1 << " (size: " << s1.size() << ")\n"
-         << "s2: " << s2 << " (size: " << s2.size() << ")\n";
+    cout << "s1: " << s1 << endl
+         << "s2: " << s2 << endl;
 
     // DayOfYearSet unionSet = s1 + s2;
     // DayOfYearSet diffSet = s1 - s2;
@@ -187,34 +189,37 @@ void test3 () {
          << "!s1    : " << !s1 << "\n\n";
     cout << "Complement of s2\n" 
          << "!s2    : " << !s2 << "\n\n";
-    cout << "Complement of s1 has " << (!s1).size() << " element\n";
+    // cout << "Complement of s1 has " << (!s1).size() << " element\n";
 }
 
 void test4 () {
     // construct sets s1 and s2
-    DayOfYearSet s1, s2;
-    s1.add(DayOfYearSet::DayOfYear(3, 12));
-    s1.add(DayOfYearSet::DayOfYear(4, 10));
-    s1.add(DayOfYearSet::DayOfYear(5, 21));
-    s1.add(DayOfYearSet::DayOfYear(4, 22));
-    s1.add(DayOfYearSet::DayOfYear(7, 1));
-    s1.add(DayOfYearSet::DayOfYear(12, 15));
+    DayOfYearSet s1;
+    s1.add(3, 12);
+    s1.add(4, 10);
+    s1.add(5, 21);
+    s1.add(4, 22);
+    s1.add(7, 1);
+    s1.add(12, 15);
+    cout << "s1: " << s1 << endl;
     s1.save("set1.txt");
 
-    // construct second set as compliment of s1
-    s2 = !s1;
-    cout << s2 << " size(" << s2.size() << ")" << endl;
+    DayOfYearSet s2(s1);
+    s2.add(12, 11);
+    s2.add(2, 28);
+    s2.add(5, 2);
+    cout << "s2: " << s2 << endl;
     s2.save("set2.txt");   
 
-    // take difference of two set and save the result the file
-    DayOfYearSet difference = s1 - s2;
-    difference.save("set3.txt");
+    // take difference of s1 and s2 and save the result the file
+    DayOfYearSet s3 = s2 - s1;
+    cout << "s3: " << s3 << endl;
+    s3.save("set3.txt");
     
-    cout << "s1 is a set and s2 is compliment of s1\n"
-         << "s1 and s2 saved respectively to the files \"set1.txt\" and \"set1.txt\"\n"
-         << "s1 difference s2 is saved as \"set3.txt\"\n"
-         << "Check the results\n";
-    //! check the load function
+    cout << "\nSets are printed to the files:\n"
+         << "s1: set1.txt\n"
+         << "s2: set2.txt\n"
+         << "s3: set3.txt\n";
 }
 
 // Note that for sets s1 and s2, De Morgan says that !(s1 + s2) == !s1 ^ !s2
@@ -223,17 +228,15 @@ void test5 () {
     DayOfYearSet s1("setA.txt"), s2("setB.txt");
     int r;
 
-/*
-    cout << "Sets\n"
-         << "s1: " << s1 << " (size: " << s1.size() << ")\n"
-         << "s2: " << s2 << " (size: " << s2.size() << ")\n";
-*/
+    // cout << "Sets\n"
+    //      << "s1: " << s1 << " (size: " << s1.size() << ")\n"
+    //      << "s2: " << s2 << " (size: " << s2.size() << ")\n";
 
     if (!(s1 + s2) == (!s1 ^ !s2)) {
-        cout << "the complement of the union of two sets is " 
+        cout << "The complement of the union of two sets is " 
              << "the same as the intersection of their complements\n";
         if (!(s1 ^ s2) == !s1 + !s2)
-            cout << "the complement of the intersection of two sets "
+            cout << "The complement of the intersection of two sets "
                  << "is the same as the union of their complements\n";
         else
             r = EXIT_FAILURE;
@@ -256,11 +259,11 @@ void test6 () {
     cout << "So far " << DayOfYearSet::AllDoY() << " DoY object alive in DayOfYearSet sets\n";
 
     DayOfYearSet s2;
-    s2.add(DayOfYearSet::DayOfYear(12, 2));    
-    s2.add(DayOfYearSet::DayOfYear(6, 21));    
-    s2.add(DayOfYearSet::DayOfYear(2, 25));    
-    s2.add(DayOfYearSet::DayOfYear(7, 29));    
-    s2.add(DayOfYearSet::DayOfYear(3, 17));    
+    s2.add(12, 2);    
+    s2.add(6, 21);    
+    s2.add(2, 25);    
+    s2.add(7, 29);    
+    s2.add(3, 17);    
     cout << s2.size() << " new DoY object created\n"
          << "So totaly " << DayOfYearSet::AllDoY() << " object alive in DayOfYearSet sets\n"; 
 }

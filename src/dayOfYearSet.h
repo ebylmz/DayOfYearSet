@@ -54,26 +54,24 @@ namespace DoYGTU {
 
             friend bool operator== (const DayOfYear & d1, const DayOfYear & d2);
             friend bool operator!= (const DayOfYear & d1, const DayOfYear & d2);
-            //! is friend function needed (12 == d1)
 
             DayOfYear operator+ (int forward) const; 
             // returns the date of the forward day later
             DayOfYear operator- (int backward) const; 
             // returns the date of the backward day later
             
-            DayOfYear operator++ ();          // pre increment 
-            DayOfYear operator++ (int);       // post increment
-            // set the day as next day (tomarrow) 
-            DayOfYear operator-- ();          // pre decrement
-            DayOfYear operator-- (int);       // post decrement 
+            DayOfYear operator++ ();    // pre increment 
+            DayOfYear operator++ (int); // post increment
+            // set the day as next day (tomarrow)  
+            DayOfYear operator-- ();    // pre decrement
+            DayOfYear operator-- (int); // post decrement 
             // set the day as previos day (yesterday)
         private:
-            bool isDay (int day) const;         //! IS NEDEED ?    
-            bool isMonth (int month) const;     //! IS NEDEED ?  
             int dayInMonth () const;
             // returns the total day in current month
             int dayInMonth (int month) const;
             // returns the total day in given month
+            
             int _day;
             int _month;
         }; // inner class DayOfYear
@@ -92,6 +90,7 @@ namespace DoYGTU {
         bool isInSet (const DayOfYear & element) const;
         // checks if set contains given element 
         
+        int add (int month, int day);
         int add (const DayOfYear & element);
         // returns EXIT_SUCCESS: successful execution
         // returns EXIT_FAILURE: unsuccessful execution (dublicated values or insuffucient memory)
@@ -106,12 +105,18 @@ namespace DoYGTU {
 
         int resize (int newsize);
         // resize the size of the set
-        //! I think it should be private 
 
         int load (const char * filename);
         // construct the DoY set with given elements of set 
         int save (const char * filename) const;
         // saves the elements of the current DoY set to the given file 
+
+        int size () const;
+        // returns the number of alive element inside of the set
+        int capacity () const;
+        // returns the current capacity of the set
+        static int AllDoY ();
+        // returns the total number of DayOfYear objects alive in all the sets
 
         friend ostream & operator<< (ostream & outs, const DayOfYearSet & s);
 
@@ -133,12 +138,6 @@ namespace DoYGTU {
         // returns the element at given position as "lvalue"
         const DayOfYear & operator[] (int index) const;  
         // returns the element at given position as "rvalue"
-
-        int size () const;
-        int capacity () const;
-
-        static int AllDoY ();
-        // returns the total number of DayOfYear objects alive in all the sets
     private:
         static int _AllDoY;   // total number of DayOfYear objects alive in all the sets
         int _size;           

@@ -20,6 +20,7 @@ using std::cerr;
 using std::endl;
 
 namespace DoYGTU {
+
     /******************************************************************************
      *                              DayOfYearSet::DayOfYear
      ******************************************************************************/
@@ -190,7 +191,8 @@ namespace DoYGTU {
             case 10: return 31;
             case 11: return 30;
             case 12: return 31;
-            default: return 0;  // returns 0 for invalid month values
+            // returns 0 for invalid month values
+            default: return 0;  
         }
     }
 
@@ -199,17 +201,10 @@ namespace DoYGTU {
         return tmp.dayInMonth();
     }
 
-    inline bool DayOfYearSet::DayOfYear::isDay (int theDay) const {
-        return 1 <= theDay && theDay <= dayInMonth();
-    }
-
-    inline bool DayOfYearSet::DayOfYear::isMonth (int theMonth) const {
-        return 1 <= theMonth && theMonth <= 12;
-    }
-
     /******************************************************************************
      *                             DayOfYearSet
      ******************************************************************************/
+
     DayOfYearSet::DayOfYearSet (const DayOfYearSet & s)
     : _size(s.size()), _capacity(s.capacity()) {
         _set = new DayOfYearSet::DayOfYear[s.capacity()];
@@ -269,6 +264,10 @@ namespace DoYGTU {
             if (_set[i] == element)
                 return true;
         return false;
+    }
+
+    int DayOfYearSet::add (int month, int day) {
+        return add(DayOfYear(month, day));
     }
 
     int DayOfYearSet::add (const DayOfYearSet::DayOfYear & element) {
@@ -374,6 +373,12 @@ namespace DoYGTU {
             return EXIT_FAILURE;
     }
 
+    inline int DayOfYearSet::size() const {return _size;}
+
+    inline int DayOfYearSet::capacity () const {return _capacity;}
+
+    int DayOfYearSet::AllDoY () {return _AllDoY;}
+
     ostream & operator<< (ostream & outs, const DayOfYearSet & s) {
         cout << "{";
 
@@ -382,7 +387,7 @@ namespace DoYGTU {
             if (i + 1 < s.size())
                 outs << ", ";
         }
-        outs << "}";
+        outs << "} (size: " << s.size() << ")";
             
         return outs;
     }
@@ -477,10 +482,4 @@ namespace DoYGTU {
             exit(1);
         }
     }
-
-    inline int DayOfYearSet::size() const {return _size;}
-
-    inline int DayOfYearSet::capacity () const {return _capacity;}
-
-    int DayOfYearSet::AllDoY () {return _AllDoY;}
 } // namespace DoYGTU 

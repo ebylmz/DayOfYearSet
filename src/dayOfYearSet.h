@@ -10,12 +10,8 @@ using std::istream;
 using std::ofstream;
 using std::ifstream;
 
-//! PROBLEMS
-// What happens after execution of remove()?
-    // Put the last element to the delete index
-// Is set maintain the user enter order?
-// How to take compliment (!) of the set?
-
+//! USE decltype and auto
+//! USE decltype and auto
 //! USE decltype and auto
 
 namespace DoYGTU {
@@ -24,17 +20,21 @@ namespace DoYGTU {
         // inner class DayOfYear
         class DayOfYear {
         public:
-            DayOfYear (int theMonth = 1, int theDay = 1);
+            DayOfYear (int month = 1, int day = 1);
             // default DayOfYear objects initialized as January 1
 
-            int setDay (int theDay);
-            int setMonth (int theMonth);
+            int setDay (int day);
+            int setMonth (int month);
 
             int getDay () const;
             int getMonth () const;
 
             int daySoFar () const;
             // returns the number of the day passed so far
+
+            void print () const;
+            //! NOT IMPLEMTED YET
+            // prints the day as words format
 
             friend ostream & operator<< (ostream & outs, const DayOfYear & d);
             friend istream & operator>> (istream & ins, DayOfYear & d);
@@ -43,8 +43,13 @@ namespace DoYGTU {
             friend bool operator!= (const DayOfYear & d1, const DayOfYear & d2);
             //! is friend function needed (12 == d1)
         
-            friend const DayOfYear operator+ (const DayOfYear & d1, const DayOfYear & d2); 
-            //! not sure is needed
+            DayOfYear operator- (const DayOfYear & other) const; 
+            // returns the date between to date
+
+            DayOfYear operator+ (int forward) const; 
+            // returns the date of the forward day later
+            DayOfYear operator- (int backward) const; 
+            // returns the date of the backward day later
             
             DayOfYear operator++ ();          // pre increment 
             DayOfYear operator++ (int);       // post increment
@@ -53,13 +58,14 @@ namespace DoYGTU {
             DayOfYear operator-- (int);       // post decrement 
             // set the day as previos day (yesterday)
         private:
-            bool isDay (int theDay) const;       //! IS NEDEED ?    
-            bool isMonth (int theMonth) const;     //! IS NEDEED ?  
+            bool isDay (int day) const;         //! IS NEDEED ?    
+            bool isMonth (int month) const;     //! IS NEDEED ?  
             int dayInMonth () const;
             // returns the total day in current month
-
-            int day;
-            int month;
+            int dayInMonth (int month) const;
+            // returns the total day in given month
+            int _day;
+            int _month;
         }; // inner class DayOfYear
 
         DayOfYearSet (const DayOfYearSet & s);
@@ -76,23 +82,34 @@ namespace DoYGTU {
         bool isInSet (const DayOfYear & element) const;
         
         int add (const DayOfYear & element);
-        // returns 0 for successful execution for dublicated values returs 1
+        // returns EXIT_SUCCESS: successful execution
+        // returns EXIT_FAILURE: unsuccessful execution (dublicated values or insuffucient memory)
+
         int remove (const DayOfYear & element);
         int remove (int index);
+        // returns EXIT_SUCCESS: successful execution
+        // returns EXIT_FAILURE: unsuccessful execution (non-member element)
+
+        void empty ();
+        // deletes all the set and set it as empty set
 
         int resize (int newsize);
+        // resize the size of the set
+        //! I think it should be private 
 
         int load (const char * filename);
+        // construct the DoY set with given elements of set 
         int save (const char * filename) const;
+        // saves the elements of the current DoY set to the given file 
 
         friend ostream & operator<< (ostream & outs, const DayOfYearSet & s);
-        // prints DayOfYearSet details
+        //! prints DayOfYearSet details
+        // should I add size information
 
-        DayOfYearSet & operator= (const DayOfYearSet & other);
+        DayOfYearSet operator= (const DayOfYearSet & other);
         bool operator== (const DayOfYearSet & other);
         bool operator!= (const DayOfYearSet & other);
-        // two sets are equal if their elements are equal regardless of the keeping order
-  
+        // two sets are equal if their elements are equal regardless of the keeping order  
 
         DayOfYearSet operator+ (const DayOfYearSet & other);
         // returns the union set
@@ -117,7 +134,7 @@ namespace DoYGTU {
         static int _AllDoY;   // total number of DayOfYear objects alive in all the sets
         int _size;           
         int _capacity;
-        DayOfYear * set;
+        DayOfYear * _set;
     }; // class DayOfYearSet
 } // namespace DoYGTU 
 

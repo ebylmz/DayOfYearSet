@@ -410,10 +410,13 @@ namespace DoYGTU {
     }
 
     bool DayOfYearSet::operator== (const DayOfYearSet & other) {
-        for (int i = 0; i < other.size(); ++i) 
-            if (!isInSet(other[i]))
-                return false;
-        return true;
+        if (size() == other.size()) {
+            for (int i = 0; i < other.size(); ++i) 
+                if (!isInSet(other[i]))
+                    return false;
+            return true;
+        }
+        return false;
     }
 
     bool DayOfYearSet::operator!= (const DayOfYearSet & other) {

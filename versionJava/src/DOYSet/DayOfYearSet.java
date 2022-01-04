@@ -38,13 +38,13 @@ public class DayOfYearSet implements Cloneable {
             }
         }
 
-        //! we can do this as static f
         /**
          * Returns the number of day in given month
          * @param month 
          * @return day in given month, 0 for invalid month values
          */
-        public int dayInMonth (int m) {
+        //! we can do this as static method
+        public static int dayInMonth (int m) throws IllegalAccessError {
             switch (m) {
                 case  1: return 31;
                 case  2: return 28;
@@ -58,14 +58,22 @@ public class DayOfYearSet implements Cloneable {
                 case 10: return 31;
                 case 11: return 30;
                 case 12: return 31;
-                // returns 0 for invalid month values
-                default: return 0;
-                //! throw error  
+                default:
+                    throw new IllegalArgumentException();
             }        
         }
 
-        // if next month has less day than current day value,
-        // then day is setted as 1
+        /**
+         * @return the number of day passed from first day of year to current day
+         */
+        public int daySoFar () {
+            int dayMonth = 0;
+            for (int i = 1; i < month(); ++i)
+                dayMonth += dayInMonth(i);
+            return dayMonth + day(); 
+        }
+
+        // if next month has less day than current day value, then day is setted as 1
         private void nextMonth () {
             _month = (month() == 12) ? 1 : _month + 1; 
             // check if day is suitable for new month
@@ -73,9 +81,7 @@ public class DayOfYearSet implements Cloneable {
                 _day = 1;
         }
 
-
-        // if next month has less day than current day value,
-        // then day is setted as 1
+        // if next month has less day than current day value, then day is setted as 1
         private void preMonth () {
             _month = (month() == 1) ? 12 : _month - 1; 
             // check if day is suitable for new month
@@ -83,12 +89,10 @@ public class DayOfYearSet implements Cloneable {
                 _day = 1;
         }
 
-
         /**
          * Returns the number of day in current month
          * @return day in current month
          */
-
         public int dayInMonth () {
             return dayInMonth(month());
         }
@@ -96,7 +100,7 @@ public class DayOfYearSet implements Cloneable {
         public int day () {return _day;}
 
         public int month () {return _month;}
-    
+        
         public void setDay (int d) {
             if (d <= dayInMonth())
                 _day = d;
@@ -151,28 +155,39 @@ public class DayOfYearSet implements Cloneable {
             return newday;
         }
 
+        /**
+         * 
+         * @param other
+         * @return true for this day comes before other day
+         */
+        public boolean preceding (DayOfYear other) {
+            return daySoFar() < other.daySoFar();
+        }
+
+        public boolean equals (DayOfYear other) {
+            return day() == other.day() && month() == other.month();
+        }
+
         public String toString () {
             return String.format("%d/%d", _day, _month);
         }
     }
 
+    /** Total day in year */
     public final int DAY_IN_YEAR = 365;
     private DayOfYear[] _set;   // dynamic array keeps set elements
     private int _size;          // keeps the filled array size
-    // to do not have issue with _set.length when _set is equals to null 
-    private static int _total; 
+    private static int _total;  // total number of DayOfYear objects alive in all the sets
     
     public DayOfYearSet (ArrayList<DayOfYear> arr) {        
         reserve(arr.size());  
         for (var e : arr)
             add(e);
-        ++_total;   // new DayOfYearSet constructed
     }
     
     public DayOfYearSet () {
         _size = 0;
         _set = null;
-        ++_total;   // new DayOfYearSet constructed
     }
 
     public DayOfYearSet clone () {
@@ -200,24 +215,23 @@ public class DayOfYearSet implements Cloneable {
         if (size() != other.size())
             return false;        
         
-        for (var e : _set)
-            if (!other.inside(e))
+        for (int i = 0; i < size(); ++i)
+            if (!other.inside(at(i)))
                 return false;
         return true;
     }
 
-
+    /**
+     * @return the total number of DayOfYear objects alive in all the sets
+     */
     public static int total () {return _total;}
 
-    // checks if given element is inside this set
+    /**
+     * 
+     * @param element
+     * @return true if element is in set
+     */
     public boolean inside (DayOfYear element) {
-        //!!!!!!!!!!!11
-        /*
-        for (var v : _set)
-            if (v.equals(element))
-                return true;
-        return false;
-        */
         return find(element) != -1;
     }
 
@@ -225,13 +239,50 @@ public class DayOfYearSet implements Cloneable {
     // o.w. returns the size of the set
     public int find (DayOfYear element) {
         for (int i = 0; i < size(); ++i)
-            if (element.equals(_set[i]))
+            if (at(i).equals(element))
                 return i;
         return -1;
     }
 
+    /**
+     * @return number of elements in the DayOfYearSet
+     */
     public int size () {return _size;}
     
+    //! returns final object to not modify it
+    //! how user modify the set values ??? setAt () ...
+    /**
+     * Returns the element at given position
+     * @param position
+     * @return final DayOfYear object at position DayOfYearSet
+     * @throws IllegalAccessError
+     */
+    public final DayOfYear at (int position) throws IllegalAccessError {
+        if (_set == null || position < 0 || position >= size())
+            throw new IllegalAccessError();
+        return _set[position];
+    }
+
+    /**
+     * Sorts the set as increasing order
+     */
+    public void sort () {
+        for (int i = 1; i < size(); ++i) {
+            DayOfYear min = _set[i].clone();
+            
+            int j = i;
+            while (j > 0 && min.preceding(_set[j - 1])) {
+                _set[j] = _set[j - 1];
+                --j;
+            }
+            _set[j] = min;
+        }
+    }
+
+    /**
+     * Adds given element to the set. No duplication allowed.
+     * @param element
+     */
     public void add (DayOfYear element) {
         if (!inside(element)) {
             // make sure set has capacity to adding new elements
@@ -242,21 +293,43 @@ public class DayOfYearSet implements Cloneable {
             
             _set[_size] = element.clone(); 
             ++_size;
+            ++_total;   // new DayOfYear object created
         }
     }
 
+    /**
+     * Removes the given element if it's inside of the set
+     * @param element
+     */
     public void remove (DayOfYear element) {
-        int position = find(element); 
-        if (position != -1) {
+        // find returns the position of given element
+        remove(find(element));  
+    }
+
+    /**
+     * Removes the element at given position
+     * @param position
+     */
+    public void remove (int position) {
+        if (0 <= position && position < size()) {
             // if remove element is located at last position, 
             // then no copy-paste needed. Just decrease the set size 
             for (int i = position + 1; i < size(); ++i)
                 _set[i - 1] = _set[i];
             --_size;
+            --_total;   // a DayOfYear object killed
         }
     }
 
-    public void reserve (int newcapacity) {
+    /**
+     * deletes all the set and set it as empty set 
+     */
+    public void empty () {
+        _size = 0;
+    }
+
+    // reserve is private because memory manipulation doesn't concern the user 
+    private void reserve (int newcapacity) {
         if (newcapacity >= 0) {
             if (_size > newcapacity)
                 _size = newcapacity;
@@ -269,38 +342,53 @@ public class DayOfYearSet implements Cloneable {
         }
     }
 
+    /**
+     * @param other
+     * @return union of two set
+     */
     public DayOfYearSet union (DayOfYearSet other) {
         DayOfYearSet newset = this.clone();
 
-        for (var e : other._set)
-            add(e); // add function does not allow dublicated elements
+        for (int i = 0; i < other.size(); ++i)
+            newset.add(other.at(i)); // add function does not allow dublicated elements
         return newset;
     }
 
+    /**
+     * @param other
+     * @return difference of this from other set
+     */
     public DayOfYearSet difference (DayOfYearSet other) {
         DayOfYearSet newset = new DayOfYearSet();
 
         // add the elements which are only in this set
-        for (var e : _set)
-            if (!other.inside(e))
-                newset.add(e);
+        for (int i = 0; i < size(); ++i)
+            if (!other.inside(at(i)))
+                newset.add(at(i));
         return newset;
     } 
 
+    /**
+     * @param other
+     * @return intersection of two set
+     */
     public DayOfYearSet intersection (DayOfYearSet other) {
         DayOfYearSet newset = new DayOfYearSet();
 
-        // add the elements which are in both this sets
-        for (var e : _set)
-            if (other.inside(e))
-                newset.add(e);
+        // add the elements which are in both sets
+        for (int i = 0; i < size(); ++i)
+            if (other.inside(at(i)))
+                newset.add(at(i));
         return newset;
     } 
     
+    /**
+     * @return complement set of current set
+     */
     public DayOfYearSet complement () {
         DayOfYearSet newset = new DayOfYearSet();
-        DayOfYear e = new DayOfYear();    // an element of DayOfYearSet
-
+        DayOfYear e = new DayOfYear();  // e is 1 January by default
+        
         // try each day 
         for (int i = 0; i < DAY_IN_YEAR; ++i, e.next())
             if (!inside(e))
@@ -309,10 +397,13 @@ public class DayOfYearSet implements Cloneable {
     } 
 
     public String toString () {
-        //!!!!!!!!!!!!!!!!!!1
+        //! BETTER DESIGN NEEDED
         String str_set = "";
-        for (var e : _set)
-            str_set += e + ", ";
+        for (int i = 0; i < size(); ++i) {
+            if (i != 0)
+                str_set += ", ";
+            str_set += at(i);
+        }
         return String.format("{%s}", str_set);
     }
 }

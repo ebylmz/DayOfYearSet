@@ -18,16 +18,25 @@ import java.util.ArrayList;
 public class TestDayOfYearSet {
     public static void main (String[] args) {
         test2();
+
+        test4();
+
+        System.out.printf("\n============== END OF DRIVER PROGRAM ==============\n");
     }
 
     public static void test0 () {
+        System.out.printf("======================== Test0 ========================\n");
+
         DayOfYear today = new DayOfYear(12, 31);
 
         System.out.printf("Today is new year's eve (%s)\n", today);
         System.out.printf("Tomarrow will be first day of new year (%s)\n", today.nextDay());
+        System.out.printf("====================== Test DONE ======================\n");
     }
 
     public static void test1 () {
+        System.out.printf("======================== Test1 ========================\n");
+
         DayOfYear today = new DayOfYear(1, 5);
         DayOfYear birthday = new DayOfYear(8, 25);
 
@@ -35,9 +44,18 @@ public class TestDayOfYearSet {
             System.out.printf("Happy birthday to youu\n");
         else
             System.out.printf("I will remember your birthday. Have a good day\n");
-    }
+            System.out.printf("====================== Test DONE ======================\n");
+        }
 
+    /**
+     * Tests methods union, intersection, difference, 
+     * complement and static mothod total. 
+     */
     public static void test2 () {
+        System.out.printf("======================== Test2 ========================\n");
+
+        System.out.printf("Total number of DayOfYear objects alive in all the sets: %d\n", DayOfYearSet.total());
+
         DayOfYearSet s1 = new DayOfYearSet();
         s1.add(new DayOfYear(1, 1));
         s1.add(new DayOfYear(2, 2));
@@ -59,8 +77,6 @@ public class TestDayOfYearSet {
         s2.add(new DayOfYear(5, 5));
         System.out.printf("s2: %s\n", s2);
         
-
-
         System.out.printf("Are s1 and s2 equivalent? ");
         if (s1.equals(s2))
             System.out.println("Yes");
@@ -71,10 +87,49 @@ public class TestDayOfYearSet {
         System.out.printf("s1 ∩ s2: %s\n", s1.intersection(s2));
         System.out.printf("s1 - s2: %s\n", s1.difference(s2));
         System.out.printf("s2 - s1: %s\n", s2.difference(s1));
-        System.out.printf("~s1: %s\n", s1.complement());
+        //! System.out.printf("~s1: %s\n", s1.complement());
+
+        System.out.printf("Total number of DayOfYear objects alive in all the sets: %d\n", DayOfYearSet.total());
+        //! something wrong there need an destructor
+        System.out.printf("====================== Test DONE ======================\n");
     }
 
-    public static void test_unknown () {
+    /** Tests sort and remove method */
+    public static void test3 () {
+        System.out.printf("======================== Test3 ========================\n");
+
+        DayOfYearSet s1 = new DayOfYearSet();
+        DayOfYear d = new DayOfYear(5, 21);
+
+        s1.add(new DayOfYear(12, 5));
+        s1.add(new DayOfYear(5, 25));
+        s1.add(new DayOfYear(4, 23));
+        s1.add(new DayOfYear(2, 24));
+        s1.add(d);
+        s1.add(new DayOfYear(5, 15));
+        s1.add(new DayOfYear(9, 14));
+        s1.add(new DayOfYear(6, 16));
+        s1.add(new DayOfYear(11, 2));
+        System.out.printf("s1: %s\n", s1);
+
+        s1.sort();
+        System.out.printf("call s1.sort()\n");
+        System.out.printf("s1: %s\n", s1);
+
+        System.out.printf("Remove %s, %s, %s\n", d, s1.at(0), s1.at(s1.size() - 1));
+        s1.remove(d);
+        s1.remove(0);
+        s1.remove(s1.size() - 1);
+        s1.remove(s1.size() + 1000);    // out of index
+        s1.remove(s1.size() + 2000);    // out of index
+
+        System.out.printf("s1: %s\n", s1);
+        System.out.printf("====================== Test DONE ======================\n");
+    }
+
+    /** Tests class constructor which takes an Arraylist */
+    public static void test4 () {
+        System.out.printf("======================== Test4 ========================\n");
         ArrayList<DayOfYear> arr = new ArrayList<DayOfYear>();
         
         arr.add(new DayOfYear(1, 12));
@@ -93,5 +148,20 @@ public class TestDayOfYearSet {
         DayOfYearSet set = new DayOfYearSet(arr); 
 
         System.out.printf("set content: %s\n", set); 
+        System.out.printf("====================== Test DONE ======================\n");
     }    
+
+    /** Tests De Morgan laws in DayOfYearSet */
+    public static void test5 () {
+        System.out.printf("======================== Test5 ========================\n");
+        //! NOT IMPLEMENTED YET
+        System.out.printf("====================== Test DONE ======================\n");
+    }
+
+    /** Tests and writes some sets to text files */
+    public static void test6 () {
+        System.out.printf("======================== Test6 ========================\n");
+        //! NOT IMPLEMENTED YET
+        System.out.printf("====================== Test DONE ======================\n");
+    }
 }

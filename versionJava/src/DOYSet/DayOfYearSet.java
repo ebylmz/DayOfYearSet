@@ -11,10 +11,20 @@
 package DOYSet;
 
 import java.util.ArrayList;
+import java.util.Scanner;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class DayOfYearSet implements Cloneable {
-    // static inner class 
-    // each element of DayOfYearSet is DayOfYear object 
+    // Nested classes are divided into two categories: 
+    // static and non-static. Nested classes that are  
+    // declared static are simply called static nested classes. 
+    // Non-static nested classes are called inner classes.
+    // https://stackoverflow.com/questions/70324/java-inner-class-and-static-nested-class
+
     public static class DayOfYear implements Cloneable {
         private int _day;
         private int _month;
@@ -169,12 +179,12 @@ public class DayOfYearSet implements Cloneable {
         }
 
         public String toString () {
-            return String.format("%d/%d", _day, _month);
+            return String.format("%d/%d", _month, _day);
         }
     }
 
     /** Total day in year */
-    public final int DAY_IN_YEAR = 365;
+    private final int DAY_IN_YEAR = 365;
     private DayOfYear[] _set;   // dynamic array keeps set elements
     private int _size;          // keeps the filled array size
     private static int _total;  // total number of DayOfYear objects alive in all the sets
@@ -183,6 +193,11 @@ public class DayOfYearSet implements Cloneable {
         reserve(arr.size());  
         for (var e : arr)
             add(e);
+    }
+
+    public DayOfYearSet (String filename) {
+        this(); 
+        read(filename);
     }
     
     public DayOfYearSet () {
@@ -224,7 +239,10 @@ public class DayOfYearSet implements Cloneable {
     /**
      * @return the total number of DayOfYear objects alive in all the sets
      */
-    public static int total () {return _total;}
+    public static int total () {
+        System.gc();
+        return _total;
+    }
 
     /**
      * 
@@ -261,6 +279,19 @@ public class DayOfYearSet implements Cloneable {
         if (_set == null || position < 0 || position >= size())
             throw new IllegalAccessError();
         return _set[position];
+    }
+
+
+    public void set (int position, DayOfYear element) throws IllegalStateException {
+        if (_set == null || position < 0 || position >= size())
+            throw new IllegalAccessError();
+        _set[position] = element.clone();
+    }
+
+    public void set (int position, int month, int day) throws IllegalAccessError {
+        var v = at(position);
+        v.setDay(day);
+        v.setMonth(month);
     }
 
     /**
@@ -316,6 +347,7 @@ public class DayOfYearSet implements Cloneable {
             // then no copy-paste needed. Just decrease the set size 
             for (int i = position + 1; i < size(); ++i)
                 _set[i - 1] = _set[i];
+            _set[_size - 1] = null;
             --_size;
             --_total;   // a DayOfYear object killed
         }
@@ -325,7 +357,61 @@ public class DayOfYearSet implements Cloneable {
      * deletes all the set and set it as empty set 
      */
     public void empty () {
+        _total -= _size;
         _size = 0;
+    }
+
+    public void write (String filename) {
+        try {
+            // File file = new File(filename);
+            FileWriter writer = new FileWriter(filename);
+            if (size() > 1) {
+                writer.write(at(0).toString());
+                for (int i = 1; i < size(); ++i) 
+                    writer.write("\n" + at(i).toString());
+            }
+            writer.close();
+        }
+        catch (IOException e) {
+            System.out.println("Something went wrong.");
+            e.printStackTrace();
+        }
+    }
+
+    public void read (String filename) {
+        try {
+            File file = new File(filename);
+            Scanner reader = new Scanner(file);
+            while (reader.hasNextLine()) {
+                String str = reader.nextLine();
+                // parse an DayOfYear Object from given string
+                for (int i = 0; i < str.length(); ++i) {
+                    String m = "";  // month
+                    // read month value
+                    while (i < str.length() && Character.isDigit(str.charAt(i))) {
+                        m += str.charAt(i);
+                        ++i;
+                    }
+                    
+                    if (m.length() > 0 && str.charAt(i) == '/') {
+                        String d = "";  // day
+                        ++i;
+                        // read day value
+                        while (i < str.length() && Character.isDigit(str.charAt(i))) {
+                            d += str.charAt(i);
+                            ++i;
+                        }
+                        // add scanned element to the set
+                        add(new DayOfYear(Integer.parseInt(m), Integer.parseInt(d)));
+                    }
+                }
+            }
+            reader.close();
+        }   
+        catch (FileNotFoundException e) {
+            System.out.println("Something went wrong.");
+            e.printStackTrace();
+        }
     }
 
     // reserve is private because memory manipulation doesn't concern the user 
@@ -396,14 +482,20 @@ public class DayOfYearSet implements Cloneable {
         return newset;    
     } 
 
+    //! NOT SURE YET
+    /*
+    protected void finalize() throws Throwable {
+        _total -= size();
+    }
+    */
+
     public String toString () {
-        //! BETTER DESIGN NEEDED
-        String str_set = "";
-        for (int i = 0; i < size(); ++i) {
-            if (i != 0)
-                str_set += ", ";
-            str_set += at(i);
+        String strSet = "";
+        if (size() > 0) {
+            strSet += at(0);
+            for (int i = 1; i < size(); ++i)
+                strSet += ", " + at(i);
         }
-        return String.format("{%s}", str_set);
+        return String.format("{%s}", strSet);
     }
 }

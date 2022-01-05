@@ -18,9 +18,14 @@ import java.util.ArrayList;
 public class TestDayOfYearSet {
     public static void main (String[] args) {
         test2();
-
-        test4();
-
+        // test0();
+        // test1();
+        // test2();
+        // test3();
+        // test4();
+        // test5();
+        test6();
+        test7();
         System.out.printf("\n============== END OF DRIVER PROGRAM ==============\n");
     }
 
@@ -82,7 +87,7 @@ public class TestDayOfYearSet {
             System.out.println("Yes");
         else
             System.out.println("No");
-
+        
         System.out.printf("s1 u s2: %s\n", s1.union(s2));
         System.out.printf("s1 ∩ s2: %s\n", s1.intersection(s2));
         System.out.printf("s1 - s2: %s\n", s1.difference(s2));
@@ -154,14 +159,66 @@ public class TestDayOfYearSet {
     /** Tests De Morgan laws in DayOfYearSet */
     public static void test5 () {
         System.out.printf("======================== Test5 ========================\n");
-        //! NOT IMPLEMENTED YET
+        
+        DayOfYearSet s1 = new DayOfYearSet();
+        DayOfYearSet s2 = new DayOfYearSet();
+        boolean verify = false;
+
+        s1.add(new DayOfYear(12, 31));        
+        s1.add(new DayOfYear(1, 25));        
+        s1.add(new DayOfYear(5, 23));        
+        s1.add(new DayOfYear(2, 29));        
+
+        s2.add(new DayOfYear(12, 29));        
+        s2.add(new DayOfYear(11, 5));        
+        s2.add(new DayOfYear(2, 16));        
+        s2.add(new DayOfYear(5, 23));        
+
+        // Note that for sets s1 and s2, De Morgan says that !(s1 + s2) == !s1 ^ !s2
+        DayOfYearSet s3 = s1.union(s2).complement();
+        DayOfYearSet s4 = s1.complement().intersection(s2.complement()); 
+        
+        if (s3.equals(s4)) {
+            System.out.println("The complement of the union of two sets is the same as the intersection of their complements");
+            s3 = s1.intersection(s2).complement();
+            s4 = s1.complement().union(s2.complement());
+            if (s3.equals(s4)) {
+                System.out.println("The complement of the intersection of two sets is the same as the union of their complements");
+                System.out.println("DayOfYearSet verify the De Morgan Laws");     
+                verify = true;
+            }
+        }
+        if (!verify)
+            System.out.println("DayOfYearSet doesn't verify the De Morgan Laws");     
+
         System.out.printf("====================== Test DONE ======================\n");
     }
 
     /** Tests and writes some sets to text files */
     public static void test6 () {
         System.out.printf("======================== Test6 ========================\n");
-        //! NOT IMPLEMENTED YET
+        DayOfYearSet s1 = new DayOfYearSet("sets/s1.txt");
+        DayOfYearSet s2 = new DayOfYearSet("sets/s2.txt");
+
+        System.out.printf("s1: %s\n", s1);
+        System.out.printf("s2: %s\n", s2);
+        System.out.printf("s1 ∩ s2: %s\n", s1.intersection(s2));
+        
+        System.out.printf("====================== Test DONE ======================\n");
+    }
+
+    public static void test7 () {
+        System.out.printf("======================== Test6 ========================\n");
+    
+        DayOfYearSet s1 = new DayOfYearSet("sets/s1.txt");
+        System.out.printf("s1: %s\n", s1);
+        
+        System.out.printf("Some modification on s1\n");
+        s1.set(0, 1, 2);
+        s1.set(1, 2, 3);
+        s1.set(s1.size() - 1, new DayOfYear(12, 31));
+        System.out.printf("s1: %s\n", s1);
+        
         System.out.printf("====================== Test DONE ======================\n");
     }
 }
